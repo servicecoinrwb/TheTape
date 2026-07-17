@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>THE TAPE · $TAPE · It goes up and it goes down.</title>
+<meta name="description" content="THE TAPE. A memecoin on Robinhood Chain. No roadmap. No utility. No owner. No promises. 1,867,000,000 supply, fixed forever."/>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.11.1/dist/ethers.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Playfair+Display:wght@900&family=Anton&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4efe4; --paper2:#ece5d3; --ink:#17140e; --faded:#6b6355;
+    --red:#b3202a; --green:#0a7a45; --line:#c9bfa8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Special Elite', 'Courier New', monospace;
+    min-height:100vh; overflow-x:hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(0,0,0,.03), transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(0,0,0,.04), transparent 50%);
+  }
+
+  /* ── ticker tape strips ─────────────────────────── */
+  .tape{
+    background:var(--ink); color:var(--paper);
+    white-space:nowrap; overflow:hidden; font-size:14px;
+    border-top:3px solid var(--ink); border-bottom:3px solid var(--ink);
+    position:relative; user-select:none;
+  }
+  .tape .inner{display:inline-block; padding:8px 0; animation:scroll 40s linear infinite;}
+  .tape .up{color:#5fe0a0} .tape .dn{color:#ff7b7b}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .tape.reverse .inner{animation-direction:reverse; animation-duration:55s}
+
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+
+  /* ── hero ───────────────────────────────────────── */
+  .hero{text-align:center; padding:64px 0 40px; border-bottom:2px solid var(--ink); position:relative}
+  .est{font-size:12px; letter-spacing:.35em; text-transform:uppercase; color:var(--faded)}
+  h1{
+    font-family:'Playfair Display', Georgia, serif; font-weight:900;
+    font-size:clamp(64px, 14vw, 150px); line-height:.9; letter-spacing:-.01em;
+    margin:10px 0 4px;
+  }
+  h1 .the{display:block;font-size:.32em;letter-spacing:.4em;font-family:'Anton',sans-serif;font-weight:400}
+  .tag{font-size:clamp(15px,2.6vw,20px); margin-top:14px}
+  .tag b.u{color:var(--green)} .tag b.d{color:var(--red)}
+  .ca{
+    display:inline-flex; align-items:center; gap:10px; margin-top:26px;
+    border:2px solid var(--ink); padding:10px 14px; font-size:12px;
+    background:var(--paper2); cursor:pointer; word-break:break-all;
+  }
+  .ca:hover{background:var(--ink); color:var(--paper)}
+  .btns{margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+  .btn{
+    display:inline-block; border:2px solid var(--ink); padding:12px 26px;
+    text-decoration:none; color:var(--ink); font-size:14px; letter-spacing:.08em;
+    text-transform:uppercase; background:var(--paper); transition:all .15s; cursor:pointer;
+    font-family:inherit;
+  }
+  .btn:hover{background:var(--ink); color:var(--paper)}
+  .btn.primary{background:var(--ink); color:var(--paper)}
+  .btn.primary:hover{background:var(--red); border-color:var(--red)}
+
+  /* ── stat plates ────────────────────────────────── */
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); border-bottom:2px solid var(--ink)}
+  .stat{padding:26px 18px; text-align:center; border-right:1px dashed var(--line)}
+  .stat:last-child{border-right:none}
+  .stat .k{font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--faded); margin-bottom:8px}
+  .stat .v{font-family:'Anton',sans-serif; font-size:clamp(20px,4vw,34px); letter-spacing:.02em}
+  .stat .s{font-size:11px; color:var(--faded); margin-top:6px}
+  .stat .v.red{color:var(--red)}
+
+  /* ── the rules ──────────────────────────────────── */
+  .rules{padding:48px 0; border-bottom:2px solid var(--ink); text-align:center}
+  .rules h2, .burnbox h2{
+    font-family:'Anton',sans-serif; font-size:26px; letter-spacing:.14em;
+    text-transform:uppercase; margin-bottom:22px;
+  }
+  .rule{font-size:16px; padding:10px 0; border-bottom:1px dashed var(--line); max-width:520px; margin:0 auto}
+  .rule:last-child{border-bottom:none}
+  .rule .no{color:var(--red); font-weight:bold}
+  .fine{font-size:11px; color:var(--faded); margin-top:22px; line-height:1.7}
+
+  /* ── burn machine ───────────────────────────────── */
+  .burnbox{padding:48px 0; border-bottom:2px solid var(--ink); text-align:center}
+  .burnbox p.exp{font-size:13px; color:var(--faded); max-width:480px; margin:0 auto 20px; line-height:1.7}
+  .burnrow{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px}
+  .burnrow input{
+    font-family:inherit; font-size:14px; padding:12px 14px; width:220px;
+    border:2px solid var(--ink); background:var(--paper2); color:var(--ink); outline:none;
+  }
+  .msg{font-size:12px; margin-top:14px; min-height:18px; color:var(--faded)}
+  .msg.ok{color:var(--green)} .msg.err{color:var(--red)}
+  .yourbal{font-size:13px; margin-top:10px; color:var(--faded)}
+
+  footer{padding:34px 0 26px; text-align:center; font-size:11px; color:var(--faded); line-height:1.9}
+  footer a{color:var(--ink)}
+
+  @media(max-width:640px){ .stats{grid-template-columns:1fr} .stat{border-right:none; border-bottom:1px dashed var(--line)} }
+</style>
+</head>
+<body>
+
+<div class="tape"><div class="inner" id="tapeTop"></div></div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="est">Est. supply 1867 × 10⁶ · Robinhood Chain</div>
+    <h1><span class="the">THE</span>TAPE</h1>
+    <div class="tag">It goes <b class="u">up ▲</b> and it goes <b class="d">down ▼</b>. That's it. That's the coin.</div>
+    <div class="ca" id="caBox" title="Click to copy">
+      <span>CA:</span><span id="caText">0xA84057E1faDFF25a9502839a7Ea9233E4b85e5a8</span><span id="caHint">⧉</span>
+    </div>
+    <div class="btns">
+      <a class="btn primary" href="https://app.uniswap.org/swap?outputCurrency=0xA84057E1faDFF25a9502839a7Ea9233E4b85e5a8" target="_blank">Read the tape (buy)</a>
+      <a class="btn" href="https://robinhoodchain.blockscout.com/token/0xA84057E1faDFF25a9502839a7Ea9233E4b85e5a8" target="_blank">Inspect the machine</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="k">Printed (fixed forever)</div>
+      <div class="v">1,867,000,000</div>
+      <div class="s">no mint function exists — this number can only go down</div>
+    </div>
+    <div class="stat">
+      <div class="k">Still circulating</div>
+      <div class="v" id="supply">—</div>
+      <div class="s" id="supplySub">reading the chain…</div>
+    </div>
+    <div class="stat">
+      <div class="k">Fed to the machine (burned)</div>
+      <div class="v red" id="burned">—</div>
+      <div class="s">torched forever by holders, for fun</div>
+    </div>
+  </div>
+
+  <div class="rules">
+    <h2>The Rules of the Tape</h2>
+    <div class="rule"><span class="no">NO</span> roadmap. The plan is: it trades.</div>
+    <div class="rule"><span class="no">NO</span> utility. It does absolutely nothing, on purpose.</div>
+    <div class="rule"><span class="no">NO</span> owner. The contract has no admin, no mint, no pause, no tax.</div>
+    <div class="rule"><span class="no">NO</span> promises. Anyone telling you otherwise is not us.</div>
+    <div class="fine">
+      This is a memecoin, which is to say: a collectible number with a chart.<br/>
+      Not an investment. Not financial advice. Spend only what you'd spend at the fair.<br/>
+      The contract is 60 lines — go read it. That's the whole trick: there is no trick.
+    </div>
+  </div>
+
+  <div class="burnbox">
+    <h2>Feed the Machine</h2>
+    <p class="exp">The one thing you can do besides hold and trade: burn your own TAPE.
+    Burned tokens are destroyed forever and the "circulating" number above shrinks.
+    Why? There is no why. This is a ceremonial furnace.</p>
+    <div class="burnrow">
+      <input id="burnAmt" inputmode="decimal" placeholder="Amount of TAPE"/>
+      <button class="btn" id="btnConnect">Connect</button>
+      <button class="btn primary" id="btnBurn">🔥 Burn</button>
+    </div>
+    <div class="yourbal" id="yourBal"></div>
+    <div class="msg" id="burnMsg">Connect a wallet on Robinhood Chain to use the furnace. Burning is optional, irreversible, and entirely for the bit.</div>
+  </div>
+</div>
+
+<div class="tape reverse"><div class="inner" id="tapeBot"></div></div>
+
+<footer>
+  THE TAPE · Robinhood Chain (4663) · contract
+  <a href="https://robinhoodchain.blockscout.com/token/0xA84057E1faDFF25a9502839a7Ea9233E4b85e5a8" target="_blank">0xA840…e5a8</a><br/>
+  The ticker tape machine was invented in 1867. This is its dumbest descendant.
+</footer>
+
+<script>
+(async () => {
+  const CA = "0xA84057E1faDFF25a9502839a7Ea9233E4b85e5a8";
+  const CHAIN_ID = 4663, CHAIN_HEX = "0x1237";
+  const RPC = "https://rpc.mainnet.chain.robinhood.com";
+  const EXPLORER = "https://robinhoodchain.blockscout.com";
+  const MAX = 1_867_000_000;
+  const ABI = [
+    "function totalSupply() view returns (uint256)",
+    "function balanceOf(address) view returns (uint256)",
+    "function burn(uint256)"
+  ];
+  const el = id => document.getElementById(id);
+
+  // ── ticker strips: a long day of prints ──────────
+  function tapeLine(){
+    let s = "", px = 0.000001867;
+    for (let i=0;i<60;i++){
+      const up = Math.random() > .48;
+      px = Math.max(0.000000001, px * (up ? 1 + Math.random()*.04 : 1 - Math.random()*.04));
+      s += `&nbsp;&nbsp;TAPE <span class="${up?'up':'dn'}">${up?'▲':'▼'} ${px.toFixed(9)}</span>&nbsp;&nbsp;·`;
+    }
+    return s + s; // doubled for seamless loop
+  }
+  el("tapeTop").innerHTML = tapeLine();
+  el("tapeBot").innerHTML = tapeLine();
+
+  // ── copy CA ──────────────────────────────────────
+  el("caBox").onclick = () => {
+    navigator.clipboard.writeText(CA).then(()=>{
+      el("caHint").textContent = "copied!";
+      setTimeout(()=>el("caHint").textContent="⧉", 1200);
+    });
+  };
+
+  // ── live supply / burned (read-only, no wallet needed) ──
+  let provider=null, signer=null, acct=null, tape=null;
+  const ro = new ethers.JsonRpcProvider(RPC);
+  const roTape = new ethers.Contract(CA, ABI, ro);
+
+  async function refresh(){
+    try{
+      const ts = +ethers.formatUnits(await roTape.totalSupply(), 18);
+      const burned = MAX - ts;
+      el("supply").textContent = Math.round(ts).toLocaleString();
+      el("burned").textContent = Math.round(burned).toLocaleString();
+      el("supplySub").textContent = burned > 0
+        ? ((burned/MAX)*100).toFixed(4) + "% of all TAPE ever is gone"
+        : "nothing burned yet — the furnace is cold";
+      if (acct && tape){
+        const b = +ethers.formatUnits(await tape.balanceOf(acct), 18);
+        el("yourBal").textContent = "Your tape: " + b.toLocaleString(undefined,{maximumFractionDigits:2}) + " TAPE";
+      }
+    }catch(e){
+      el("supplySub").textContent = "chain read failed — refresh, or the RPC is napping";
+    }
+  }
+
+  // ── wallet + furnace ─────────────────────────────
+  async function connect(){
+    if (!window.ethereum){ setMsg("No wallet found. Install MetaMask or Rabby to burn.", "err"); return false; }
+    try{
+      const accts = await window.ethereum.request({method:"eth_requestAccounts"});
+      const cid = await window.ethereum.request({method:"eth_chainId"});
+      if (parseInt(cid,16) !== CHAIN_ID){
+        try{ await window.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:CHAIN_HEX}]}); }
+        catch(e){
+          if (e && (e.code===4902 || String(e.message||"").includes("4902"))){
+            await window.ethereum.request({method:"wallet_addEthereumChain", params:[{
+              chainId:CHAIN_HEX, chainName:"Robinhood Chain", rpcUrls:[RPC],
+              blockExplorerUrls:[EXPLORER], nativeCurrency:{name:"Ether",symbol:"ETH",decimals:18}
+            }]});
+          } else { setMsg("Switch your wallet to Robinhood Chain (4663) to burn.", "err"); return false; }
+        }
+      }
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      acct = (await signer.getAddress());
+      tape = new ethers.Contract(CA, ABI, signer);
+      el("btnConnect").textContent = acct.slice(0,6)+"…"+acct.slice(-4);
+      setMsg("Furnace armed. Enter an amount and burn — this is permanent and pointless, which is the point.", "");
+      refresh();
+      return true;
+    }catch(e){ setMsg("Connection canceled.", "err"); return false; }
+  }
+  function setMsg(t, cls){ const m = el("burnMsg"); m.textContent = t; m.className = "msg " + (cls||""); }
+
+  el("btnConnect").onclick = connect;
+  el("btnBurn").onclick = async () => {
+    if (!signer){ if (!await connect()) return; }
+    const v = el("burnAmt").value.trim();
+    if (!v || isNaN(+v) || +v <= 0){ setMsg("Enter how much TAPE to feed the machine.", "err"); return; }
+    try{
+      const amt = ethers.parseUnits(v, 18);
+      const bal = await tape.balanceOf(acct);
+      if (bal < amt){ setMsg("You only hold " + (+ethers.formatUnits(bal,18)).toLocaleString() + " TAPE — can't burn more than you have.", "err"); return; }
+      if (!confirm("Burn " + v + " TAPE forever? There is no undo, no reward, and no reason.")) return;
+      setMsg("Burning…", "");
+      await (await tape.burn(amt)).wait();
+      setMsg("🔥 " + v + " TAPE fed to the machine. It is gone. You feel something.", "ok");
+      el("burnAmt").value = "";
+      refresh();
+    }catch(e){
+      const s = (e && (e.shortMessage||e.message)) || String(e);
+      setMsg(s.replace(/execution reverted: ?/i,"").slice(0,120), "err");
+    }
+  };
+
+  refresh();
+  setInterval(refresh, 30000);
+})();
+</script>
+</body>
+</html>
